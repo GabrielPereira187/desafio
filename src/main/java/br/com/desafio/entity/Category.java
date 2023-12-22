@@ -1,6 +1,7 @@
 package br.com.desafio.entity;
 
 import br.com.desafio.entity.enums.CategoryType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,6 +22,7 @@ public class Category {
     @NotNull
     @Column(name = "category_name", unique = true)
     @Size(min = 5, max = 50, message = "error")
+    @JsonProperty("categoryName")
     private String categoryName;
     @NotNull
     @Column(name = "category_active")

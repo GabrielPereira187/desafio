@@ -13,4 +13,4 @@ spring:
           preferred_uuid_jdbc_type: CHAR
     show-sql: 'true'
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update

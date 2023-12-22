@@ -1,5 +1,6 @@
 package br.com.desafio.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,11 +20,12 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity(name = "product_table")
 @Data
+@Audited
 public class Product {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
-    private UUID productId;
+    private Long productId;
     @Column(name = "product_name")
     @NotNull
     @Size(min = 5, max = 50, message = "error")
@@ -34,10 +37,9 @@ public class Product {
     @NotNull
     @Size(min = 5, max = 50, message = "error")
     private String SKU;
-    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "category_id", referencedColumnName = "category_id")
     @NotNull
-    private Category category;
+    private Long categoryId;
     @NotNull
     @Column(name = "product_cost")
     @DecimalMin(value = "0.0", inclusive = false, message = "error")
@@ -56,7 +58,6 @@ public class Product {
     private String image;
     @NotNull
     private LocalDateTime entryDate = LocalDateTime.now();
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
-    private User user;
+    @JoinColumn(name = "userId", referencedColumnName = "user_id")
+    private Long userId;
 }
