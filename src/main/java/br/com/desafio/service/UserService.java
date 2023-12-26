@@ -5,6 +5,7 @@ import br.com.desafio.entity.User;
 import br.com.desafio.exception.User.UserNotFoundException;
 import br.com.desafio.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,5 +24,9 @@ public class UserService {
 
     public String getUserName(Long userId) {
         return userRepository.findUsernameById(userId);
+    }
+
+    public UserDetails findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }
