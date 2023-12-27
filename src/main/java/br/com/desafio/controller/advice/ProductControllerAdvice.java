@@ -1,6 +1,8 @@
 package br.com.desafio.controller.advice;
 
 import br.com.desafio.exception.Category.CategoryNotFoundException;
+import br.com.desafio.exception.File.EmptyFieldList;
+import br.com.desafio.exception.File.FieldNotExistException;
 import br.com.desafio.exception.Product.ProductNotFoundException;
 import br.com.desafio.exception.User.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -32,4 +34,19 @@ public class ProductControllerAdvice {
     public String categoryNotFoundHandler(CategoryNotFoundException ex){
         return ex.getMessage();
     }
+
+    @ResponseBody
+    @ExceptionHandler(FieldNotExistException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String fieldNotExistHandler(FieldNotExistException ex){
+        return ex.getMessage();
+    }
+
+    @ResponseBody
+    @ExceptionHandler(EmptyFieldList.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String emptyFieldListHandler(EmptyFieldList ex){
+        return ex.getMessage();
+    }
+
 }

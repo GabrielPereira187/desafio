@@ -6,12 +6,15 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +24,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Builder
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,10 +33,10 @@ public class User implements UserDetails {
     private String password;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Date createdAt;
+    private String createdAt;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
-    private Date updatedAt;
+    private String updatedAt;
     private String email;
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
@@ -78,9 +82,15 @@ public class User implements UserDetails {
         return true;
     }
 
-    public User(String password, String email, UserRole userRole) {
-        this.password = password;
-        this.email = email;
-        this.userRole = userRole;
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = getActualDateAndTime();
+    }
+
+    private String getActualDateAndTime() {
+        LocalDateTime dateTime = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        return dateTime.format(formatter);
     }
 }

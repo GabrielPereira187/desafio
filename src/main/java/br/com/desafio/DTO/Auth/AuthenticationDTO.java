@@ -1,4 +1,8 @@
 package br.com.desafio.DTO.Auth;
 
-public record AuthenticationDTO(String email, String password) {
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
+
+public record AuthenticationDTO(@NotBlank(message = "O campo email é obrigatorio") @JsonProperty("email") String email,
+                                @NotBlank(message = "O campo senha é obrigatorio") @JsonProperty("senha") String password) {
 }

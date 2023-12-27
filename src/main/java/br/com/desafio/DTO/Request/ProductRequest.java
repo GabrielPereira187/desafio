@@ -4,9 +4,7 @@ import br.com.desafio.entity.Category;
 import br.com.desafio.entity.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -14,33 +12,36 @@ import java.math.BigDecimal;
 
 @Data
 public class ProductRequest {
-    @NotNull
-    @Size(min = 5, max = 50, message = "error")
+    @NotBlank(message = "O campo nome é obrigatorio")
+    @Size(min = 8, max = 50, message = "O campo nome precisa de no minimo 8 e no maximo 50 caracteres")
+    @JsonProperty("nome")
     private String name;
-    @NotNull
-    @Size(min = 5, max = 50, message = "error")
     @JsonProperty("sku")
+    @NotBlank(message = "O campo sku é obrigatorio")
     private String SKU;
-    @NotNull
-    @JsonProperty("category")
+    @NotNull(message = "O campo categoria é obrigatorio")
+    @JsonProperty("categoria_id")
     private Long categoryId;
-    @NotNull
-    @DecimalMin(value = "0.0", inclusive = false, message = "error")
+    @NotNull(message = "O campo custo é obrigatorio")
+    @DecimalMin(value = "0.0", inclusive = false, message = "")
+    @JsonProperty("custo")
     private BigDecimal cost;
-    @NotNull
-    @DecimalMin(value = "0.0", inclusive = false, message = "error")
+    @NotNull(message = "O campo icms é obrigatorio")
+    @DecimalMin(value = "0.0", inclusive = false, message = "")
     @JsonProperty("icms")
     private BigDecimal ICMS;
-    @NotNull
-    @DecimalMin(value = "0.0", inclusive = false, message = "error")
+    @NotNull(message = "O campo valor é obrigatorio")
+    @DecimalMin(value = "0.0", inclusive = false, message = "")
+    @JsonProperty("valor")
     private BigDecimal revenueValue;
-    @NotNull
+    @NotBlank(message = "O campo imagem é obrigatorio")
     @Size(min = 5, max = 50, message = "error")
+    @JsonProperty("imagem")
     private String image;
-    @NotNull
-    @JsonProperty("user")
+    @NotNull(message = "O campo usuario é obrigatorio")
+    @JsonProperty("usuario_id")
     private Long userId;
-    @NotNull
-    @Column(name = "product_active")
-    private boolean activeProduct = true;
+    @NotNull(message = "O campo quantidade é obrigatorio")
+    @JsonProperty("quantidade")
+    private Long quantity;
 }

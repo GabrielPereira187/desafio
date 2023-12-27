@@ -16,8 +16,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-
 @Service
 public class AuthorizationService implements UserDetailsService {
 
@@ -35,7 +33,6 @@ public class AuthorizationService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserDetails userDetails = userRepository.findByEmail(email);
         return userRepository.findByEmail(email);
     }
 
@@ -54,8 +51,11 @@ public class AuthorizationService implements UserDetailsService {
             return ResponseEntity.badRequest().build();
         String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
 
-        User newUser = new User(registerDto.email(), encryptedPassword, registerDto.role());
-        newUser.setCreatedAt(new Date(System.currentTimeMillis()));
+        User newUser = User.builder()
+                .email(registerDto.email())
+                .password(encryptedPassword)
+                .userRole(registerDto.role())
+                .build();
         this.userRepository.save(newUser);
         return ResponseEntity.ok().build();
     }
