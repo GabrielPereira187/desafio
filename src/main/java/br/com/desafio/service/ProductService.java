@@ -58,6 +58,9 @@ public class ProductService {
     }
 
     public ProductResponse getProduct(Long productId) throws ProductNotFoundException {
+
+        log.info("Buscando produto de id:{}", productId);
+
         return productConverter.convertProductToProductResponse(
                 productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId.toString())));
     }
@@ -67,12 +70,18 @@ public class ProductService {
         MessagesResponse response = new MessagesResponse();
         if (!violations.isEmpty()) {
             response.setMessages(violations);
+
+            log.info("Erros encontrados para inserção de produto");
+
             return ResponseEntity.status(400).body(response);
         }
         if(checkIfUserAndCategoryExists(product.getUserId(), product.getCategoryId())) {
             try {
-                productConverter.convertProductToProductResponse
+                ProductResponse productResponse = productConverter.convertProductToProductResponse
                         (productRepository.save(productConverter.convertProductRequestToProduct(product)));
+
+                log.info("Produto com id:{} salvo com suceso", productResponse.getProductId());
+
                 return ResponseEntity.ok("Product added successfully");
             } catch (Exception e) {
                 throw new Exception(e.getMessage());
@@ -82,6 +91,9 @@ public class ProductService {
     }
 
     private boolean checkIfUserAndCategoryExists(Long userId, Long categoryId) throws CategoryNotFoundException, UserNotFoundException {
+
+        log.info("Checando se usuario:{} e categoria:{} existem no sistema", userId, categoryId);
+
         return userService.getUser(userId) != null && categoryService.getCategory(categoryId) != null;
     }
 
@@ -89,6 +101,9 @@ public class ProductService {
         try {
             getProduct(productId);
             productRepository.deleteById(productId);
+
+            log.info("Deletando produto de id:{}", productId);
+
             return ResponseEntity.ok("deletado com sucesso");
         } catch (Exception e) {
             throw new ProductNotFoundException(e.getMessage());
@@ -115,9 +130,15 @@ public class ProductService {
                             productToUpdate.setICMS(product.getICMS());
                         }
                         productConverter.convertProductToProductResponse(productRepository.save(productToUpdate));
-                        return ResponseEntity.ok(Collections.singletonList("Updated successfully"));
+
+                        log.info("Produto com id:{} salvo com suceso", productId);
+
+                        return ResponseEntity.ok(Collections.singletonList("Inserted successfully"));
                     }).orElseGet(() ->{
                         productConverter.convertProductToProductResponse(productRepository.save(productConverter.convertProductRequestToProduct(product)));
+
+                        log.info("Produto com id:{} atualizado com suceso", productId);
+
                         return ResponseEntity.ok(Collections.singletonList("Updated successfully"));
                     });
         }
@@ -126,6 +147,9 @@ public class ProductService {
 
 
     public ResponseEntity<Page<Product>> getProducts(Pageable pageable) {
+
+        log.info("Buscando produtos");
+
         return ResponseEntity.ok(productRepository.findAll(pageable));
     }
 
@@ -133,6 +157,9 @@ public class ProductService {
         try {
             getProduct(productId);
             productRepository.deactivateProduct(productId);
+
+            log.info("Desativando produto com id:{}", productId);
+
             return ResponseEntity.ok("desativado com sucesso");
         } catch (Exception e) {
             throw new ProductNotFoundException(e.getMessage());
@@ -141,6 +168,9 @@ public class ProductService {
 
     public Page<ProductResponse> getProductByUser(Long userId, Optional<Integer> page, Optional<String> sortBy, Optional<Integer> pageSize, Optional<Sort.Direction> sort) throws UserNotFoundException {
         if(userService.getUser(userId) != null) {
+
+            log.info("Buscando produtos inseridos pelo usuario:{}", userId);
+
             return productConverter.convertProductPageToProductResponsePage(productRepository.findByUserId(userId,
                     getPageable(page, sortBy, pageSize, sort)));
         }
@@ -154,6 +184,8 @@ public class ProductService {
         for(Revision<Long, Product> revision: revisions) {
             auditItems.add(createAuditItem(revision));
         }
+
+        log.info("Buscando dados de auditoria do produto:{}", id);
 
         return auditItems;
     }
@@ -194,6 +226,8 @@ public class ProductService {
                                             Optional<BigDecimal> revenueValue,
                                             Optional<Long> quantity) {
         Example<Product> productExample = Example.of(buildProduct(productId, name, entryDate, active, sku, categoryId, cost, icms, revenueValue, userId, quantity));
+
+        log.info("Buscando produtos filtrando por campos escolhidos pelo usuário");
 
         return productConverter.convertProductPageToProductResponsePage(productRepository.findAll(productExample, getPageable(page, sortBy, pageSize, sort)));
     }
@@ -241,6 +275,9 @@ public class ProductService {
         for(ProductResponse productResponse: productByFields.getContent()) {
             valueResponseList.add(createAggregatedValueResponse(productResponse));
         }
+
+        log.info("Buscando valores agregados de produto inseridos pelo usuario:{}", userId);
+
         return createPage(valueResponseList, page, pageSize, sortBy, sort);
     }
 
@@ -263,6 +300,8 @@ public class ProductService {
         for(ProductResponse productResponse: productByFields.getContent()) {
             valueResponseList.add(createAggregatedValueResponse(productResponse));
         }
+
+        log.info("Buscando valores agregados de produto filtrando por múltiplos campos");
 
         return createPage(valueResponseList, page, pageSize, sortBy, sort);
     }
@@ -298,6 +337,9 @@ public class ProductService {
     public AuditChanges getDetailedRevisions(Long revisionId) {
         Tuple tuple = productRepository.findRevisionByRevType(revisionId);
         Javers javers = JaversBuilder.javers().build();
+
+        log.info("Buscando auditoria com id:{}", revisionId);
+
         if(tuple != null) {
             ProductResponse productResponse = productConverter.tupleToProductResponse(tuple);
             ProductResponse productResponseLastRev = productConverter
@@ -313,11 +355,16 @@ public class ProductService {
                 changesResponse.add(new ChangesResponse(property, oldValue, newValue));
             }
 
+            log.info("Buscando dados detalhados da última movimentação antes de auditoria:{}", revisionId);
+
             return AuditChanges.builder()
                     .changes(changesResponse)
                     .description("Detalhamento auditoria de ID:" + revisionId)
                     .build();
         }
+
+
+        log.info("Sem movimento de atualização ou inserção anteriormente a id:{}", revisionId);
 
         return AuditChanges.builder()
                 .description("Auditoria de ID:" + revisionId + " não é do tipo atualização ou não existe")
@@ -331,6 +378,8 @@ public class ProductService {
         product.setImage(file.getName());
 
         productRepository.save(product);
+
+        log.info("Salvando imagem para o produto com id:{}", productId);
 
         return ResponseEntity.ok("Sucesso");
     }

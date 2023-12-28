@@ -13,28 +13,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-
-@SqlResultSetMapping(
-        name = "ProductResponseMapping",
-        classes = @ConstructorResult(
-                targetClass = ProductResponse.class,
-                columns = {
-                        @ColumnResult(name = "productId", type = Long.class),
-                        @ColumnResult(name = "name", type = String.class),
-                        @ColumnResult(name = "activeProduct", type = Boolean.class),
-                        @ColumnResult(name = "categoryId", type = Long.class),
-                        @ColumnResult(name = "cost", type = BigDecimal.class),
-                        @ColumnResult(name = "ICMS", type = BigDecimal.class),
-                        @ColumnResult(name = "revenueValue", type = BigDecimal.class),
-                        @ColumnResult(name = "image", type = String.class),
-                        @ColumnResult(name = "entryDate", type = LocalDateTime.class),
-                        @ColumnResult(name = "updatedDate", type = LocalDateTime.class),
-                        @ColumnResult(name = "userId", type = Long.class),
-                        @ColumnResult(name = "quantity", type = Long.class),
-                }
-        )
-)
-
 @AllArgsConstructor @NoArgsConstructor
 @Data
 @Builder

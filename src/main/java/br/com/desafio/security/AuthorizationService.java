@@ -5,6 +5,7 @@ import br.com.desafio.DTO.Auth.LoginResponseDTO;
 import br.com.desafio.DTO.Auth.RegisterDTO;
 import br.com.desafio.entity.User;
 import br.com.desafio.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class AuthorizationService implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -43,6 +45,8 @@ public class AuthorizationService implements UserDetailsService {
         var auth = this.authenticationManager.authenticate(userNamePassword);
         var token = this.tokenService.generateToken((User) auth.getPrincipal());
 
+        log.info("Logando usuario com email:{}", authentication.email());
+
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
@@ -56,6 +60,9 @@ public class AuthorizationService implements UserDetailsService {
                 .password(encryptedPassword)
                 .userRole(registerDto.role())
                 .build();
+
+        log.info("Registrando novo usuario com email:{} e role:{}", registerDto.email(), registerDto.role().getRole());
+
         this.userRepository.save(newUser);
         return ResponseEntity.ok().build();
     }

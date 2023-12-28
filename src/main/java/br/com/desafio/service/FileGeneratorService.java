@@ -4,6 +4,7 @@ import br.com.desafio.DTO.Response.ProductResponse;
 import br.com.desafio.exception.File.EmptyFieldList;
 import br.com.desafio.exception.File.FieldNotExistException;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -20,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
+@Slf4j
 public class FileGeneratorService {
 
     Map<String, String> headerMap = new HashMap<>();
@@ -47,6 +49,8 @@ public class FileGeneratorService {
             csvBeanWriter.write(productResponse,csvFieldMapping);
         }
 
+        log.info("Gerando csv com campos:{}", fields);
+
         csvBeanWriter.close();
     }
 
@@ -61,12 +65,11 @@ public class FileGeneratorService {
         }
 
         for (ProductResponse productResponse : productResponseList.getContent()) {
-            Row row = sheet.createRow(sheet.getLastRowNum() + 1); // Adiciona uma nova linha ao final
+            Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 
             for (int i = 0; i < fields.size(); i++) {
                 String fieldName = fields.get(i);
 
-                // Obtenha o valor do campo dinâmico (fieldName) usando reflexão
                 try {
                     Field field = ProductResponse.class.getDeclaredField(fieldName);
                     field.setAccessible(true);
@@ -74,18 +77,20 @@ public class FileGeneratorService {
 
                     Cell cell = row.createCell(i);
                     if (value != null) {
-                        cell.setCellValue(value.toString()); // Insere o valor na célula
+                        cell.setCellValue(value.toString());
                     } else {
-                        cell.setCellValue(""); // Define como vazio se o valor for nulo
+                        cell.setCellValue("");
                     }
                 } catch (NoSuchFieldException | IllegalAccessException e) {
-                    e.printStackTrace(); // Trate a exceção adequadamente
+                    e.printStackTrace();
                 }
             }
         }
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=" + generateFileName(".xlsx"));
+
+        log.info("Gerando xlsx com campos:{}", fields);
 
         workbook.write(response.getOutputStream());
         workbook.close();

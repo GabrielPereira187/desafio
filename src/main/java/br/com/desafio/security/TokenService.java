@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.time.ZoneOffset;
 
 
 @Service
+@Slf4j
 public class TokenService {
 
     private final String secret = "secret";
@@ -25,6 +27,9 @@ public class TokenService {
 
     public String generateToken(User user) {
         try {
+
+            log.info("Gerando token para usuario com id:{}", user.getId());
+
             Algorithm algorithm = Algorithm.HMAC256(secret);
 
             return JWT.create()
@@ -41,6 +46,8 @@ public class TokenService {
     public ResponseEntity<String> validateToken(String token) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
+        log.info("Validando token:{}", token);
+
         return ResponseEntity.ok(JWT.require(algorithm).withIssuer("auth").build().verify(token).getSubject());
     }
 
@@ -51,9 +58,9 @@ public class TokenService {
                 .build()
                 .verify(token.substring(7));
 
-        Claim roleClaim = decodedJWT.getClaim("role");
+        log.info("Checando se usuario com token:{} é administrador", token);
 
-        return roleClaim.asString().equals("ADMIN");
+        return decodedJWT.getClaim("role").asString().equals("ADMIN");
     }
 
     private Instant getExpirationDate(){
