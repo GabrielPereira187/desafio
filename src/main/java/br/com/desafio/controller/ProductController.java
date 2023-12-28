@@ -26,6 +26,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -34,6 +35,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @RestController
 @RequestMapping(value = "api/v1/product", produces = {"application/json"})
@@ -70,9 +73,14 @@ public class ProductController {
             @ApiResponse(responseCode = "400", description = "Parametros inválidos"),
             @ApiResponse(responseCode = "500", description = "Erro ao inserir o produto"),
     })
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<Object> saveProduct(@RequestBody ProductRequest product) throws Exception {
         return productService.saveProduct(product);
+    }
+
+    @PostMapping(value = "/upload", consumes = "multipart/form-data")
+    public ResponseEntity<Object> saveImageToProduct(@RequestParam("file") MultipartFile file, @RequestParam("productId") Long productId) throws Exception {
+        return productService.saveFileToProduct(productId, file);
     }
 
     @Operation(summary = "Realiza a deleção de um produto", method = "DELETE")
@@ -244,6 +252,8 @@ public class ProductController {
         Page<ProductResponse> productByFields = productService.getProductByFields(userId, Optional.empty(), Optional.of("productId"), Optional.of(2000), Optional.empty(), productId, name, entryDate, active, sku, categoryId, cost, icms, revenueValue, quantity);
         if(format.equalsIgnoreCase("csv")) {
             fileGeneratorService.generateCSV(response, productByFields, fields);
+        } else {
+            fileGeneratorService.generateXLS(response, productByFields, fields);
         }
     }
 
@@ -256,7 +266,9 @@ public class ProductController {
         if(format.equalsIgnoreCase("csv")) {
             fileGeneratorService.generateCSV(response, productsByUser, fields);
         }
-
+        else {
+            fileGeneratorService.generateXLS(response, productsByUser, fields);
+        }
     }
 
 }

@@ -34,8 +34,6 @@ public class ProductRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = "")
     @JsonProperty("valor")
     private BigDecimal revenueValue;
-    @NotBlank(message = "O campo imagem é obrigatorio")
-    @Size(min = 5, max = 50, message = "error")
     @JsonProperty("imagem")
     private String image;
     @NotNull(message = "O campo usuario é obrigatorio")

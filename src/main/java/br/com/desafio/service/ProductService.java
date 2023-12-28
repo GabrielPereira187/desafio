@@ -21,19 +21,14 @@ import org.javers.core.diff.changetype.ValueChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.history.Revision;
-import org.springframework.data.history.Revisions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -330,4 +325,13 @@ public class ProductService {
 
     }
 
+    public ResponseEntity<Object> saveFileToProduct(Long productId, MultipartFile file) throws IOException {
+        Product product = productRepository.findById(productId).get();
+
+        product.setImage(file.getName());
+
+        productRepository.save(product);
+
+        return ResponseEntity.ok("Sucesso");
+    }
 }

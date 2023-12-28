@@ -43,8 +43,8 @@ public class Product {
     @Column(name = "product_revenue_value", nullable = false)
     @DecimalMin(value = "0.0", inclusive = false, message = "{campo.revenda.negativo}")
     private BigDecimal revenueValue;
-    @Column(name = "product_image", nullable = false)
-    @Size(min = 5, max = 50, message = "error")
+    @Column(name = "product_image", nullable = false, columnDefinition = "LONGTEXT")
+    @Lob
     private String image;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "product_created_at")
