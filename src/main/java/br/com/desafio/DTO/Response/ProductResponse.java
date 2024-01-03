@@ -1,6 +1,7 @@
 package br.com.desafio.DTO.Response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.ColumnResult;
 import jakarta.persistence.ConstructorResult;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor @NoArgsConstructor
 @Data
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductResponse {
     private Long productId;
     private String name;
@@ -29,7 +31,7 @@ public class ProductResponse {
     @JsonFormat(pattern="dd/MM/yyyy HH:mm:ss")
     private LocalDateTime entryDate;
     @JsonFormat(pattern="dd/MM/yyyy HH:mm:ss")
-    private LocalDateTime updatedDate;
+    private LocalDateTime updatedAt;
     private Long userId;
     private Long quantity;
 }

@@ -5,12 +5,14 @@ import br.com.desafio.entity.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 
 @Data
+@AllArgsConstructor
 public class ProductRequest {
     @NotBlank(message = "O campo nome é obrigatorio")
     @Size(min = 8, max = 50, message = "O campo nome precisa de no minimo 8 e no maximo 50 caracteres")

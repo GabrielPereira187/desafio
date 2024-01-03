@@ -23,7 +23,7 @@ public class TokenService {
     private final String secret = "secret";
     
     @Value("${jwt-time-expiration-in-minutes}")
-    private Integer TOKEN_EXPIRATION_TIME;
+    private final Integer TOKEN_EXPIRATION_TIME = 5;
 
     public String generateToken(User user) {
         try {

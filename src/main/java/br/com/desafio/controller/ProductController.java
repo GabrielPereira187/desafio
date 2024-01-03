@@ -3,7 +3,6 @@ package br.com.desafio.controller;
 
 import br.com.desafio.DTO.Request.ProductRequest;
 import br.com.desafio.DTO.Response.AggregatedValueResponse;
-import br.com.desafio.DTO.Response.MessagesResponse;
 import br.com.desafio.DTO.Response.ProductResponse;
 import br.com.desafio.entity.AuditItem;
 import br.com.desafio.entity.Product;
@@ -16,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -23,20 +23,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @RestController
 @RequestMapping(value = "api/v1/product", produces = {"application/json"})
@@ -62,8 +56,8 @@ public class ProductController {
             @ApiResponse(responseCode = "500", description = "Erro ao buscar o produto"),
     })
     @GetMapping("/{productId}")
-    public ProductResponse getProduct(@PathVariable Long productId) throws ProductNotFoundException {
-        return productService.getProduct(productId);
+    public ProductResponse getProduct(@PathVariable Long productId, HttpServletRequest request) throws ProductNotFoundException, NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
+        return productService.getProduct(productId, getToken(request));
     }
 
     @Operation(summary = "Realiza a inserção de um produto", method = "POST")
@@ -74,7 +68,7 @@ public class ProductController {
             @ApiResponse(responseCode = "500", description = "Erro ao inserir o produto"),
     })
     @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<Object> saveProduct(@RequestBody ProductRequest product) throws Exception {
+    public ResponseEntity<Object> saveProduct(@RequestBody ProductRequest product, HttpServletRequest request) throws Exception {
         return productService.saveProduct(product);
     }
 
@@ -92,8 +86,8 @@ public class ProductController {
             @ApiResponse(responseCode = "500", description = "Erro ao deletar o produto"),
     })
     @DeleteMapping("/{productId}")
-    public ResponseEntity<String> deleteProduct(@Valid @PathVariable Long productId) throws ProductNotFoundException {
-        return productService.deleteProduct(productId);
+    public ResponseEntity<String> deleteProduct(@Valid @PathVariable Long productId, HttpServletRequest request) throws ProductNotFoundException {
+        return productService.deleteProduct(productId, getToken(request));
     }
 
     @Operation(summary = "Realiza a atualização de um produto", method = "PUT")
@@ -106,8 +100,8 @@ public class ProductController {
     @PutMapping("/{productId}")
     public ResponseEntity<List<String>> updateProduct(@PathVariable Long productId,
                                                       @RequestBody ProductRequest product,
-                                                      @RequestHeader(HttpHeaders.AUTHORIZATION) String token) throws UserNotFoundException, CategoryNotFoundException {
-        return productService.updateProduct(productId, product, token);
+                                                      HttpServletRequest request) throws UserNotFoundException, CategoryNotFoundException {
+        return productService.updateProduct(productId, product, getToken(request));
     }
     @Operation(summary = "Realiza a busca paginada de todos os produtos", method = "GET")
     @ApiResponses(value = {
@@ -129,8 +123,8 @@ public class ProductController {
             @ApiResponse(responseCode = "500", description = "Erro ao buscar o produto"),
     })
     @PostMapping("deactivate/{productId}")
-    public ResponseEntity<String> deactivateProduct(@Valid @PathVariable Long productId) throws ProductNotFoundException {
-        return productService.deactivateProduct(productId);
+    public ResponseEntity<String> deactivateProduct(@Valid @PathVariable Long productId, HttpServletRequest request) throws ProductNotFoundException {
+        return productService.deactivateProduct(productId, getToken(request));
     }
 
     @Operation(summary = "Realiza a busca paginada de produtos por um id de usuario", method = "GET")
@@ -146,7 +140,7 @@ public class ProductController {
                                                    @RequestParam(value = "sortBy") Optional<String> sortBy,
                                                    @RequestParam(value = "sort") Optional<Sort.Direction> sort,
                                                    @RequestParam("size") Optional<Integer> pageSize) throws UserNotFoundException {
-        return productService.getProductByUser(userId, page, sortBy, pageSize, sort);
+        return productService.getProductsByUser(userId, page, sortBy, pageSize, sort);
     }
 
     @Operation(summary = "Realiza a busca paginada de produtos pelos seus campos", method = "GET")
@@ -183,8 +177,8 @@ public class ProductController {
             @ApiResponse(responseCode = "500", description = "Erro ao buscar dados de auditoria"),
     })
     @GetMapping("/revisions/{id}")
-    public List<AuditItem> getRevisions(@PathVariable Long id) {
-        return productService.getRevisions(id);
+    public List<AuditItem> getRevisions(@PathVariable Long id, HttpServletRequest request) throws ProductNotFoundException, NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
+        return productService.getRevisions(id, getToken(request));
     }
 
     @Operation(summary = "Realiza a busca paginada de valores agregados de produtos pelos seus campos", method = "GET")
@@ -262,7 +256,7 @@ public class ProductController {
                              HttpServletResponse response,
                              @RequestParam("userId") Long userId,
                              @RequestParam("fields") List<String> fields) throws Exception {
-        Page<ProductResponse> productsByUser = productService.getProductByUser(userId, Optional.empty(), Optional.of("productId"), Optional.of(2000), Optional.empty());
+        Page<ProductResponse> productsByUser = productService.getProductsByUser(userId, Optional.empty(), Optional.of("productId"), Optional.of(2000), Optional.empty());
         if(format.equalsIgnoreCase("csv")) {
             fileGeneratorService.generateCSV(response, productsByUser, fields);
         }
@@ -271,4 +265,7 @@ public class ProductController {
         }
     }
 
+    private String getToken(HttpServletRequest request) {
+        return request.getHeader("Authorization");
+    }
 }

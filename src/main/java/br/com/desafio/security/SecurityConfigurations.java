@@ -31,10 +31,14 @@ public class SecurityConfigurations {
                 .authorizeHttpRequests( authorizeHttpRequests -> authorizeHttpRequests
                         .requestMatchers(HttpMethod.POST, "auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "auth/register").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.POST, "api/v1/product/**").hasAnyRole("ADMIN", "ESTOQUISTA")
-//                        .requestMatchers(HttpMethod.PUT, "api/v1/product/**").hasAnyRole("ADMIN", "ESTOQUISTA")
-//                        .requestMatchers(HttpMethod.GET, "api/v1/product/**").hasAnyRole("ADMIN", "ESTOQUISTA")
-//                        .requestMatchers(HttpMethod.DELETE, "api/v1/product/**").hasAnyRole("ADMIN", "ESTOQUISTA")
+                        .requestMatchers(HttpMethod.POST, "api/v1/product/**").hasAnyRole("ADMIN", "ESTOQUISTA")
+                        .requestMatchers(HttpMethod.PUT, "api/v1/product/**").hasAnyRole("ADMIN", "ESTOQUISTA")
+                        .requestMatchers(HttpMethod.GET, "api/v1/product/**").hasAnyRole("ADMIN", "ESTOQUISTA")
+                        .requestMatchers(HttpMethod.DELETE, "api/v1/product/**").hasAnyRole("ADMIN", "ESTOQUISTA")
+                        .requestMatchers(HttpMethod.POST, "api/v1/userVisibility/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "api/v1/userVisibility/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "api/v1/userVisibility/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "api/v1/userVisibility/**").hasRole("ADMIN")
                         .anyRequest().permitAll())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
