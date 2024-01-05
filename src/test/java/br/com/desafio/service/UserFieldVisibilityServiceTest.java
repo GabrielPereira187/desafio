@@ -3,6 +3,7 @@ package br.com.desafio.service;
 import br.com.desafio.entity.UserFieldVisibility;
 import br.com.desafio.exception.UserFieldVisibility.UserVisibilityNotFoundException;
 import br.com.desafio.repository.UserFieldVisibilityRepository;
+import br.com.desafio.util.UserFieldVisibilityCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,12 +34,7 @@ public class UserFieldVisibilityServiceTest {
 
     @BeforeEach
     public void setUp() {
-        userFieldVisibility = UserFieldVisibility
-              .builder()
-              .id(1L)
-              .fieldName("name")
-              .isVisible(true)
-              .build();
+        userFieldVisibility = UserFieldVisibilityCreator.createUserFieldVisibility();
     }
 
     @Test

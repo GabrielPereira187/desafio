@@ -1,9 +1,9 @@
 package br.com.desafio.service;
 
 import br.com.desafio.entity.User;
-import br.com.desafio.entity.enums.UserRole;
 import br.com.desafio.exception.User.UserNotFoundException;
 import br.com.desafio.repository.UserRepository;
+import br.com.desafio.util.UserCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,12 +30,7 @@ public class UserServiceTest {
 
     @BeforeEach
     public void setUp() {
-        user = User
-                .builder()
-                .email("teste@gmail.com")
-                .id(1L)
-                .userRole(UserRole.ADMIN)
-                .build();
+        user = UserCreator.createAdminUser();
     }
 
     @Test

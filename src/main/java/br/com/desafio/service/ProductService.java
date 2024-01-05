@@ -10,6 +10,7 @@ import br.com.desafio.exception.Product.ProductNotFoundException;
 import br.com.desafio.exception.User.UserNotFoundException;
 import br.com.desafio.repository.ProductRepository;
 import br.com.desafio.security.TokenService;
+import br.com.desafio.util.ObjectCreationUtil;
 import br.com.desafio.validator.ObjectsValidator;
 import jakarta.persistence.Tuple;
 import lombok.extern.slf4j.Slf4j;
@@ -41,12 +42,6 @@ public class ProductService {
     private final CategoryService categoryService;
     private final ObjectsValidator<ProductRequest> productRequestObjectsValidator;
     private final TokenService tokenService;
-    private static final Integer PAGE_DEFAULT_SIZE = 5;
-    private static final Integer INITIAL_PAGE_DEFAULT = 0;
-    private static final String UPDATE = "Atualização";
-    private static final String INSERT = "Inserção";
-    private static final String DELETE = "Deleção";
-
 
     @Autowired
     public ProductService(ProductRepository productRepository, ProductConverter productConverter, UserFieldVisibilityService userFieldVisibilityService, UserService userService, CategoryService categoryService, ObjectsValidator<ProductRequest> productRequestObjectsValidator, TokenService tokenService) {
@@ -59,7 +54,7 @@ public class ProductService {
         this.tokenService = tokenService;
     }
 
-    public ProductResponse getProduct(Long productId, String token) throws ProductNotFoundException, NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
+    public ProductResponse getProduct(Long productId, String token) throws ProductNotFoundException, IllegalAccessException {
 
         log.info("Buscando produto de id:{}", productId);
 
@@ -87,7 +82,7 @@ public class ProductService {
 
                 log.info("Produto com id:{} salvo com suceso", productResponse.getProductId());
 
-                return ResponseEntity.ok("Product added successfully");
+                return ResponseEntity.ok("Produto adicionado com sucesso");
             }
         } catch (Exception e) {
             throw new Exception(e.getMessage());
@@ -95,21 +90,23 @@ public class ProductService {
         return null;
     }
 
-    protected boolean checkIfUserAndCategoryExists(Long userId, Long categoryId) throws CategoryNotFoundException, UserNotFoundException {
+    public boolean checkIfUserAndCategoryExists(Long userId, Long categoryId) throws CategoryNotFoundException, UserNotFoundException {
 
         log.info("Checando se usuario:{} e categoria:{} existem no sistema", userId, categoryId);
 
         return userService.getUser(userId) != null && categoryService.getCategory(categoryId) != null;
     }
 
-    public ResponseEntity<String> deleteProduct(Long productId, String token) throws ProductNotFoundException {
+    public ResponseEntity<String> deleteProduct(Long productId) throws ProductNotFoundException {
         try {
-            getProduct(productId, token);
-            productRepository.deleteById(productId);
+            if(checkIfProductExist(productId)) {
+                productRepository.deleteById(productId);
 
-            log.info("Deletando produto de id:{}", productId);
+                log.info("Deletando produto de id:{}", productId);
 
-            return ResponseEntity.ok("deletado com sucesso");
+                return ResponseEntity.ok("deletado com sucesso");
+            }
+            return ResponseEntity.status(404).body("Produto não encontrado");
         } catch (Exception e) {
             throw new ProductNotFoundException(e.getMessage());
         }
@@ -144,7 +141,7 @@ public class ProductService {
 
                         log.info("Produto com id:{} salvo com suceso", productId);
 
-                        return ResponseEntity.ok(Collections.singletonList("Updated successfully"));
+                        return ResponseEntity.ok(Collections.singletonList("Atualizado com sucesso"));
                     });
         }
         return null;
@@ -158,14 +155,16 @@ public class ProductService {
         return ResponseEntity.ok(productRepository.findAll(pageable));
     }
 
-    public ResponseEntity<String> deactivateProduct(Long productId, String token) throws ProductNotFoundException {
+    public ResponseEntity<String> deactivateProduct(Long productId) throws ProductNotFoundException {
         try {
-            getProduct(productId, token);
-            productRepository.deactivateProduct(productId);
+            if(checkIfProductExist(productId)) {
+                productRepository.deactivateProduct(productId);
 
-            log.info("Desativando produto com id:{}", productId);
+                log.info("Desativando produto com id:{}", productId);
 
-            return ResponseEntity.ok("desativado com sucesso");
+                return ResponseEntity.ok("desativado com sucesso");
+            }
+            return null;
         } catch (Exception e) {
             throw new ProductNotFoundException(e.getMessage());
         }
@@ -177,43 +176,23 @@ public class ProductService {
             log.info("Buscando produtos inseridos pelo usuario:{}", userId);
 
             return productConverter.convertProductPageToProductResponsePage(productRepository.findByUserId(userId,
-                    getPageable(page, sortBy, pageSize, sort)));
+                    ObjectCreationUtil.getPageable(page, sortBy, pageSize, sort)));
         }
         return null;
     }
 
-    public List<AuditItem> getRevisions(Long id, String token) throws ProductNotFoundException, NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
-        getProduct(id, token);
+    public List<AuditItem> getRevisions(Long id) throws ProductNotFoundException {
+        checkIfProductExist(id);
         List<Revision<Long, Product>> revisions = productRepository.findRevisions(id).getContent();
         List<AuditItem> auditItems = new ArrayList<>();
 
         for(Revision<Long, Product> revision: revisions) {
-            auditItems.add(createAuditItem(revision));
+            auditItems.add(ObjectCreationUtil.createAuditItem(revision, userService.getUserName(revision.getEntity().getUserId())));
         }
 
         log.info("Buscando dados de auditoria do produto:{}", id);
 
         return auditItems;
-    }
-
-    private AuditItem createAuditItem(Revision<Long, Product> revision) {
-        AuditItem auditItem = new AuditItem();
-        String revisionName = getRevisionName(revision.getMetadata().getRevisionType().toString());
-        auditItem.setAuditId(revision.getMetadata().getRevisionNumber().hashCode());
-        auditItem.setProductId(revision.getEntity().getProductId());
-        auditItem.setAction(revisionName);
-        auditItem.setDate(!revisionName.equals(UPDATE) ? revision.getEntity().getEntryDate() : revision.getEntity().getUpdatedAt());
-        auditItem.setUsername(userService.getUserName(revision.getEntity().getUserId()));
-        return auditItem;
-    }
-
-    private String getRevisionName(String revisionName) {
-        return switch (revisionName) {
-            case "INSERT" -> INSERT;
-            case "UPDATE" -> UPDATE;
-            case "DELETE" -> DELETE;
-            default -> revisionName;
-        };
     }
 
     public Page<ProductResponse> getProductByFields(Optional<Long> userId,
@@ -231,44 +210,11 @@ public class ProductService {
                                             Optional<BigDecimal> icms,
                                             Optional<BigDecimal> revenueValue,
                                             Optional<Long> quantity) {
-        Example<Product> productExample = Example.of(buildProduct(productId, name, entryDate, active, sku, categoryId, cost, icms, revenueValue, userId, quantity));
+        Example<Product> productExample = Example.of(ObjectCreationUtil.buildProductExample(productId, name, entryDate, active, sku, categoryId, cost, icms, revenueValue, userId, quantity));
 
         log.info("Buscando produtos filtrando por campos escolhidos pelo usuário");
 
-        return productConverter.convertProductPageToProductResponsePage(productRepository.findAll(productExample, getPageable(page, sortBy, pageSize, sort)));
-    }
-
-    private Pageable getPageable(Optional<Integer> page,
-                                 Optional<String> sortBy,
-                                 Optional<Integer> pageSize,
-                                 Optional<Sort.Direction> sort) {
-        return PageRequest.of(page.orElse(INITIAL_PAGE_DEFAULT), pageSize.orElse(PAGE_DEFAULT_SIZE), sort.orElse(Sort.Direction.ASC), sortBy.orElse("productId"));
-    }
-
-    private Product buildProduct(Optional<Long> productId,
-                                 Optional<String> name,
-                                 Optional<LocalDateTime> entryDate,
-                                 Optional<Boolean> active,
-                                 Optional<String> sku,
-                                 Optional<Long> categoryId,
-                                 Optional<BigDecimal> cost,
-                                 Optional<BigDecimal> icms,
-                                 Optional<BigDecimal> revenueValue,
-                                 Optional<Long> userId,
-                                 Optional<Long> quantity) {
-        return Product.builder()
-                .userId(userId.orElse(null))
-                .activeProduct(active.orElse(true))
-                .entryDate(entryDate.orElse(null))
-                .ICMS(icms.orElse(null))
-                .productId(productId.orElse(null))
-                .name(name.orElse(null))
-                .categoryId(categoryId.orElse(null))
-                .revenueValue(revenueValue.orElse(null))
-                .cost(cost.orElse(null))
-                .SKU(sku.orElse(null))
-                .quantity(quantity.orElse(null))
-                .build();
+        return productConverter.convertProductPageToProductResponsePage(productRepository.findAll(productExample, ObjectCreationUtil.getPageable(page, sortBy, pageSize, sort)));
     }
 
     public Page<AggregatedValueResponse> getAggregatedValueByUser(Long userId,
@@ -277,14 +223,11 @@ public class ProductService {
                                                                   Optional<Integer> pageSize,
                                                                   Optional<Sort.Direction> sort) throws UserNotFoundException {
         Page<ProductResponse> productByFields = getProductsByUser(userId, page, sortBy, pageSize, sort);
-        List<AggregatedValueResponse> valueResponseList = new ArrayList<>();
-        for(ProductResponse productResponse: productByFields.getContent()) {
-            valueResponseList.add(createAggregatedValueResponse(productResponse));
-        }
+        List<AggregatedValueResponse> valueResponseList = ObjectCreationUtil.createAggregatedValueResponses(productByFields);
 
         log.info("Buscando valores agregados de produto inseridos pelo usuario:{}", userId);
 
-        return createPage(valueResponseList, page, pageSize, sortBy, sort);
+        return ObjectCreationUtil.createPage(valueResponseList, page, pageSize, sortBy, sort);
     }
 
     public Page<AggregatedValueResponse> getAggregatedValueByFields(Optional<Long> userId, Optional<Long> productId,
@@ -302,42 +245,11 @@ public class ProductService {
                                                                     Optional<Sort.Direction> sort,
                                                                     Optional<Integer> pageSize) {
         Page<ProductResponse> productByFields = getProductByFields(userId, page, sortBy, pageSize, sort, productId, name, entryDate, active, sku, categoryId, cost, icms, revenueValue, quantity);
-        List<AggregatedValueResponse> valueResponseList = new ArrayList<>();
-        for(ProductResponse productResponse: productByFields.getContent()) {
-            valueResponseList.add(createAggregatedValueResponse(productResponse));
-        }
+        List<AggregatedValueResponse> valueResponseList = ObjectCreationUtil.createAggregatedValueResponses(productByFields);
 
         log.info("Buscando valores agregados de produto filtrando por múltiplos campos");
 
-        return createPage(valueResponseList, page, pageSize, sortBy, sort);
-    }
-
-    private AggregatedValueResponse createAggregatedValueResponse(ProductResponse productResponse) {
-        return AggregatedValueResponse
-                .builder()
-                .productId(productResponse.getProductId())
-                .cost(productResponse.getCost())
-                .totalCost(getTotalCost(productResponse.getCost(), productResponse.getQuantity()))
-                .forecast(getTotalReturn(productResponse.getQuantity(), productResponse.getRevenueValue()))
-                .build();
-    }
-
-    protected BigDecimal getTotalReturn(Long quantity, BigDecimal revenueValue) {
-        return BigDecimal.valueOf(quantity).multiply(revenueValue);
-    }
-
-    protected BigDecimal getTotalCost(BigDecimal cost, Long quantity) {
-        return BigDecimal.valueOf(quantity).multiply(cost);
-    }
-
-    private Page<AggregatedValueResponse> createPage(List<AggregatedValueResponse> lista, Optional<Integer> page, Optional<Integer> pageSize, Optional<String> sortBy,
-                                                     Optional<Sort.Direction> sort) {
-        int pageBegin = page.orElse(INITIAL_PAGE_DEFAULT) * pageSize.orElse(PAGE_DEFAULT_SIZE);
-        int pageEnd = Math.min(pageBegin + pageSize.orElse(PAGE_DEFAULT_SIZE), lista.size());
-
-        List<AggregatedValueResponse> pageElements = lista.subList(pageBegin, pageEnd);
-
-        return new PageImpl<>(pageElements, getPageable(page, sortBy, pageSize, sort), lista.size());
+        return ObjectCreationUtil.createPage(valueResponseList, page, pageSize, sortBy, sort);
     }
 
     public AuditChanges getDetailedRevisions(Long revisionId) {
@@ -378,8 +290,8 @@ public class ProductService {
 
     }
 
-    public ResponseEntity<Object> saveFileToProduct(Long productId, MultipartFile file) throws IOException {
-        Product product = productRepository.findById(productId).get();
+    public ResponseEntity<Object> saveFileToProduct(Long productId, MultipartFile file) throws ProductNotFoundException {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId.toString()));
 
         product.setImage(file.getName());
 
@@ -393,4 +305,9 @@ public class ProductService {
     private boolean checkIfUserIsAdmin(String token) {
         return tokenService.checkIfUserIsAdmin(token);
     }
+
+    private boolean checkIfProductExist(Long productId) throws ProductNotFoundException {
+        return productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId.toString())).isActiveProduct();
+    }
+
 }

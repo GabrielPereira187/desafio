@@ -12,6 +12,9 @@ import br.com.desafio.exception.Product.ProductNotFoundException;
 import br.com.desafio.exception.User.UserNotFoundException;
 import br.com.desafio.repository.ProductRepository;
 import br.com.desafio.security.TokenService;
+import br.com.desafio.util.CategoryCreator;
+import br.com.desafio.util.ProductCreator;
+import br.com.desafio.util.UserCreator;
 import br.com.desafio.validator.ObjectsValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,9 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -64,70 +64,20 @@ public class ProductServiceTest {
     private static final String TOKEN_EXAMPLE = "secret_token";
     Pageable pageable;
     Page<Product> productPage;
-    AggregatedValueResponse aggregatedValueResponse;
 
     @BeforeEach
     public void setUp(){
-        productRequest = new ProductRequest(
-                "Teste",
-                "Teste SKU",
-                1L,
-                BigDecimal.valueOf(20),
-                BigDecimal.valueOf(1.5),
-                BigDecimal.valueOf(40),
-                "Imagem-Teste.png",
-                1L,
-                10L);
-        productRequestWithNullValues = new ProductRequest(
-                null,
-                "Teste SKU",
-                1L,
-                BigDecimal.valueOf(20),
-                BigDecimal.valueOf(1.5),
-                BigDecimal.valueOf(40),
-                "Imagem-Teste.png",
-                1L,
-                10L);
-        product = new Product(1L,
-                "Teste",
-                true,
-                "Teste SKU",
-                1L,
-                BigDecimal.valueOf(20),
-                BigDecimal.valueOf(20),
-                BigDecimal.valueOf(1.5),
-                "Imagem-Teste.png",
-                LocalDateTime.now(),
-                null,
-                1L,
-                10L);
-
-        user = User.builder().id(1L).email("teste@gmail.com").build();
-        category = Category.builder().categoryId(1L).categoryName("Teste").build();
-        productResponse = new ProductResponse(1L,
-                "Teste",
-                true,
-                "Teste SKU",
-                1L,
-                BigDecimal.valueOf(20),
-                BigDecimal.valueOf(20),
-                BigDecimal.valueOf(1.5),
-                "Imagem-Teste",
-                LocalDateTime.now(),
-                null,
-                1L,
-                10L);
+        productRequest = ProductCreator.createProductRequest();
+        productRequestWithNullValues = ProductCreator.createProductRequestWithNullValue();
+        product = ProductCreator.createProduct();
+        user = UserCreator.createAdminUser();
+        category = CategoryCreator.createCategory();
+        productResponse = ProductCreator.createProductResponse();
         errorList.add("Erro por nome ser nulo");
         fieldsList.add("name");
         fieldsList.add("productId");
         pageable = PageRequest.of(0, 5, Sort.Direction.ASC, "productId");
         productPage = new PageImpl<>(Collections.singletonList(product));
-        aggregatedValueResponse = AggregatedValueResponse.builder().
-                cost(BigDecimal.TEN)
-                .productId(1L)
-                .totalCost(productService.getTotalCost(BigDecimal.TEN, product.getQuantity()))
-                .forecast(productService.getTotalReturn(product.getQuantity(), product.getRevenueValue()))
-                .build();
     }
 
     @Test
@@ -138,7 +88,7 @@ public class ProductServiceTest {
         when(categoryService.getCategory(1L)).thenReturn(category);
         ResponseEntity<Object> result = productService.saveProduct(productRequest);
 
-        assertEquals(Objects.requireNonNull(result.getBody()).toString(), "Product added successfully");
+        assertEquals(Objects.requireNonNull(result.getBody()).toString(), "Produto adicionado com sucesso");
         assertTrue(result.getStatusCode().is2xxSuccessful());
     }
 
@@ -191,9 +141,8 @@ public class ProductServiceTest {
     @Test
     public void shouldDeleteProduct() throws Exception {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(tokenService.checkIfUserIsAdmin(TOKEN_EXAMPLE)).thenReturn(true);
 
-        ResponseEntity<String> response = productService.deleteProduct(1L, TOKEN_EXAMPLE);
+        ResponseEntity<String> response = productService.deleteProduct(1L);
 
         verify(productRepository, times(1)).deleteById(1L);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -202,14 +151,14 @@ public class ProductServiceTest {
 
     @Test
     public void shouldNotDeleteProductBecauseNotExist() {
-        assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(1L, TOKEN_EXAMPLE));
+        assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(1L));
     }
 
     @Test
     void shouldDeactivateProduct() throws ProductNotFoundException {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
-        ResponseEntity<String> response = productService.deactivateProduct(1L, TOKEN_EXAMPLE);
+        ResponseEntity<String> response = productService.deactivateProduct(1L);
 
         verify(productRepository, times(1)).deactivateProduct(1L);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -219,7 +168,7 @@ public class ProductServiceTest {
     void shouldNotDeactivateProductBecauseNotExist() {
         when(productRepository.findById(1L)).thenReturn(null);
 
-        assertThrows(ProductNotFoundException.class, () -> productService.deactivateProduct(1L, TOKEN_EXAMPLE));
+        assertThrows(ProductNotFoundException.class, () -> productService.deactivateProduct(1L));
     }
 
     @Test
@@ -317,7 +266,7 @@ public class ProductServiceTest {
     }
 
     @Test
-    public void shouldSaveImage() throws IOException {
+    public void shouldSaveImage() throws ProductNotFoundException {
         MultipartFile file = mock(MultipartFile.class);
         given(productRepository.findById(1L)).willReturn(Optional.of(product));
 

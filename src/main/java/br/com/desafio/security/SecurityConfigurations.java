@@ -1,6 +1,7 @@
 package br.com.desafio.security;
 
 
+import br.com.desafio.entity.enums.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,10 @@ public class SecurityConfigurations {
     @Autowired
     SecurityFilter securityFilter;
 
+    private static final String ADMIN = UserRole.ADMIN.getRole();
+
+    private static final String ESTOQUISTA = UserRole.ESTOQUISTA.getRole();
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
@@ -30,15 +35,16 @@ public class SecurityConfigurations {
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests( authorizeHttpRequests -> authorizeHttpRequests
                         .requestMatchers(HttpMethod.POST, "auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "auth/register").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "api/v1/product/**").hasAnyRole("ADMIN", "ESTOQUISTA")
-                        .requestMatchers(HttpMethod.PUT, "api/v1/product/**").hasAnyRole("ADMIN", "ESTOQUISTA")
-                        .requestMatchers(HttpMethod.GET, "api/v1/product/**").hasAnyRole("ADMIN", "ESTOQUISTA")
-                        .requestMatchers(HttpMethod.DELETE, "api/v1/product/**").hasAnyRole("ADMIN", "ESTOQUISTA")
-                        .requestMatchers(HttpMethod.POST, "api/v1/userVisibility/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "api/v1/userVisibility/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "api/v1/userVisibility/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "api/v1/userVisibility/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "auth/register").hasRole(ADMIN)
+                        .requestMatchers(HttpMethod.POST, "auth/refreshToken").hasAnyRole(ADMIN, ESTOQUISTA)
+                        .requestMatchers(HttpMethod.POST, "api/v1/product/**").hasAnyRole(ADMIN, ESTOQUISTA)
+                        .requestMatchers(HttpMethod.PUT, "api/v1/product/**").hasAnyRole(ADMIN, ESTOQUISTA)
+                        .requestMatchers(HttpMethod.GET, "api/v1/product/**").hasAnyRole(ADMIN, ESTOQUISTA)
+                        .requestMatchers(HttpMethod.DELETE, "api/v1/product/**").hasAnyRole(ADMIN, ESTOQUISTA)
+                        .requestMatchers(HttpMethod.POST, "api/v1/userVisibility/**").hasRole(ADMIN)
+                        .requestMatchers(HttpMethod.PUT, "api/v1/userVisibility/**").hasRole(ADMIN)
+                        .requestMatchers(HttpMethod.GET, "api/v1/userVisibility/**").hasRole(ADMIN)
+                        .requestMatchers(HttpMethod.DELETE, "api/v1/userVisibility/**").hasRole(ADMIN)
                         .anyRequest().permitAll())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

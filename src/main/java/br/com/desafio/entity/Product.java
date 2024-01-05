@@ -26,7 +26,7 @@ public class Product {
     @Column(name = "product_id")
     private Long productId;
     @Column(name = "product_name", nullable = false)
-    @Size(min = 8, max = 50, message = "{campo.nome.size}")
+    @Size(min = 8, max = 50, message = "Nome tem que ter entre 8 e 50 caracteres")
     private String name;
     @Column(name = "product_active")
     private boolean activeProduct;

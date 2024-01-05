@@ -5,6 +5,7 @@ import br.com.desafio.entity.enums.CategoryType;
 import br.com.desafio.exception.Category.CategoryNotFoundException;
 import br.com.desafio.exception.User.UserNotFoundException;
 import br.com.desafio.repository.CategoryRepository;
+import br.com.desafio.util.CategoryCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,12 +32,7 @@ public class CategoryServiceTest {
 
     @BeforeEach
     public void setUp() {
-        category = Category
-              .builder()
-              .categoryId(1L)
-              .categoryName("teste")
-              .categoryType(CategoryType.NORMAL)
-              .build();
+        category = CategoryCreator.createCategory();
     }
 
     @Test

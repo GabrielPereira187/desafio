@@ -1,16 +1,16 @@
 package br.com.desafio.entity.enums;
 
-public enum UserRole {
-    ADMIN("admin"),
-    ESTOQUISTA("estoquista");
+import lombok.Getter;
 
-    private String role;
+@Getter
+public enum UserRole {
+    ADMIN("ADMIN"),
+    ESTOQUISTA("ESTOQUISTA");
+
+    private final String role;
 
     UserRole (String role){
         this.role = role;
     }
 
-    public String getRole(){
-        return role;
-    }
 }

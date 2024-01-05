@@ -15,37 +15,5 @@ spring:
     hibernate:
       ddl-auto: update
 
-jwt-time-expiration-in-minutes: 5
+jwt-time-expiration-in-minutes: 1
 
-campo:
-  email:
-    obrigatorio: O campo email Ã© obrigatorio
-    invalido: O campo email Ã© invalido
-  icms:
-    negativo: O campo icms tem que ser no minimo maior que zero
-    obrigatorio: O campo icms Ã© obrigatorio
-  tipousuario:
-    obrigatorio: O campo tipo de usuario Ã© obrigatorio
-  usuario:
-    obrigatorio: O campo usuario Ã© obrigatorio
-  custo:
-    obrigatorio: O campo custo Ã© obrigatorio
-    negativo: O campo custo tem que ser no minimo maior que zero
-  senha:
-    obrigatorio: O campo senha Ã© obrigatorio
-  sku:
-    obrigatorio: O campo sku Ã© obrigatorio
-  venda:
-    obrigatorio: O campo valor de venda principal Ã© obrigatorio
-  quantidade:
-    obrigatorio: O campo quantidade Ã© obrigatorio
-    negativo: O campo valor de revenda tem que ser no minimo zero
-  imagem:
-    obrigatorio: O campo imagem Ã© obrigatorio
-  revenda:
-    negativo: O campo valor de revenda tem que ser no minimo maior que zero
-  categoria:
-    obrigatorio: O campo categoria Ã© obrigatorio
-  nome:
-    obrigatorio: O campo nome Ã© obrigatorio
-    size: O campo nome precisa de no minimo 8 e no maximo 50 carateres

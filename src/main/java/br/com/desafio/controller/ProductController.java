@@ -11,6 +11,7 @@ import br.com.desafio.exception.Product.ProductNotFoundException;
 import br.com.desafio.exception.User.UserNotFoundException;
 import br.com.desafio.service.FileGeneratorService;
 import br.com.desafio.service.ProductService;
+import br.com.desafio.util.RequestUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -57,7 +58,7 @@ public class ProductController {
     })
     @GetMapping("/{productId}")
     public ProductResponse getProduct(@PathVariable Long productId, HttpServletRequest request) throws ProductNotFoundException, NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
-        return productService.getProduct(productId, getToken(request));
+        return productService.getProduct(productId, RequestUtil.getToken(request));
     }
 
     @Operation(summary = "Realiza a inserção de um produto", method = "POST")
@@ -67,7 +68,7 @@ public class ProductController {
             @ApiResponse(responseCode = "400", description = "Parametros inválidos"),
             @ApiResponse(responseCode = "500", description = "Erro ao inserir o produto"),
     })
-    @PostMapping(consumes = "multipart/form-data")
+    @PostMapping()
     public ResponseEntity<Object> saveProduct(@RequestBody ProductRequest product, HttpServletRequest request) throws Exception {
         return productService.saveProduct(product);
     }
@@ -87,7 +88,7 @@ public class ProductController {
     })
     @DeleteMapping("/{productId}")
     public ResponseEntity<String> deleteProduct(@Valid @PathVariable Long productId, HttpServletRequest request) throws ProductNotFoundException {
-        return productService.deleteProduct(productId, getToken(request));
+        return productService.deleteProduct(productId);
     }
 
     @Operation(summary = "Realiza a atualização de um produto", method = "PUT")
@@ -101,7 +102,7 @@ public class ProductController {
     public ResponseEntity<List<String>> updateProduct(@PathVariable Long productId,
                                                       @RequestBody ProductRequest product,
                                                       HttpServletRequest request) throws UserNotFoundException, CategoryNotFoundException {
-        return productService.updateProduct(productId, product, getToken(request));
+        return productService.updateProduct(productId, product, RequestUtil.getToken(request));
     }
     @Operation(summary = "Realiza a busca paginada de todos os produtos", method = "GET")
     @ApiResponses(value = {
@@ -124,7 +125,7 @@ public class ProductController {
     })
     @PostMapping("deactivate/{productId}")
     public ResponseEntity<String> deactivateProduct(@Valid @PathVariable Long productId, HttpServletRequest request) throws ProductNotFoundException {
-        return productService.deactivateProduct(productId, getToken(request));
+        return productService.deactivateProduct(productId);
     }
 
     @Operation(summary = "Realiza a busca paginada de produtos por um id de usuario", method = "GET")
@@ -177,8 +178,8 @@ public class ProductController {
             @ApiResponse(responseCode = "500", description = "Erro ao buscar dados de auditoria"),
     })
     @GetMapping("/revisions/{id}")
-    public List<AuditItem> getRevisions(@PathVariable Long id, HttpServletRequest request) throws ProductNotFoundException, NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
-        return productService.getRevisions(id, getToken(request));
+    public List<AuditItem> getRevisions(@PathVariable Long id) throws ProductNotFoundException {
+        return productService.getRevisions(id);
     }
 
     @Operation(summary = "Realiza a busca paginada de valores agregados de produtos pelos seus campos", method = "GET")
@@ -228,7 +229,7 @@ public class ProductController {
         return productService.getDetailedRevisions(revisionId);
     }
 
-    @GetMapping("filter/findByFields/{format}")
+    @GetMapping("filter/file/findByFields/{format}")
     public void generateFileByFields(@PathVariable("format") String format,
                              HttpServletResponse response,
                              @RequestParam("userId") Optional<Long> userId,
@@ -251,7 +252,7 @@ public class ProductController {
         }
     }
 
-    @GetMapping("filter/findByUser/{format}")
+    @GetMapping("filter/file/findByUser/{format}")
     public void generateFileByUser(@PathVariable("format") String format,
                              HttpServletResponse response,
                              @RequestParam("userId") Long userId,
@@ -265,7 +266,4 @@ public class ProductController {
         }
     }
 
-    private String getToken(HttpServletRequest request) {
-        return request.getHeader("Authorization");
-    }
 }

@@ -1,6 +1,9 @@
 package br.com.desafio.security;
 
+import br.com.desafio.entity.RefreshToken;
 import br.com.desafio.entity.User;
+import br.com.desafio.entity.enums.UserRole;
+import br.com.desafio.repository.RefreshTokenRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
@@ -21,21 +24,30 @@ import java.time.ZoneOffset;
 public class TokenService {
 
     private final String secret = "secret";
+
+    private final RefreshTokenRepository refreshTokenRepository;
+
+    private static final String ISSUER = "auth";
+
+    private static final String ROLE = "role";
     
     @Value("${jwt-time-expiration-in-minutes}")
-    private final Integer TOKEN_EXPIRATION_TIME = 5;
+    private Integer TOKEN_EXPIRATION_TIME;
+
+    public TokenService(RefreshTokenRepository refreshTokenRepository) {
+        this.refreshTokenRepository = refreshTokenRepository;
+    }
 
     public String generateToken(User user) {
         try {
-
             log.info("Gerando token para usuario com id:{}", user.getId());
 
             Algorithm algorithm = Algorithm.HMAC256(secret);
 
             return JWT.create()
-                    .withIssuer("auth")
+                    .withIssuer(ISSUER)
                     .withSubject(user.getEmail())
-                    .withClaim("role", user.getUserRole().toString())
+                    .withClaim(ROLE, user.getUserRole().toString())
                     .withExpiresAt(this.getExpirationDate())
                     .sign(algorithm);
         } catch (JWTCreationException e) {
@@ -44,23 +56,13 @@ public class TokenService {
     }
 
     public ResponseEntity<String> validateToken(String token) {
-        Algorithm algorithm = Algorithm.HMAC256(secret);
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(token).get();
 
-        log.info("Validando token:{}", token);
-
-        return ResponseEntity.ok(JWT.require(algorithm).withIssuer("auth").build().verify(token).getSubject());
+        return ResponseEntity.ok(refreshToken.getEmail());
     }
 
     public boolean checkIfUserIsAdmin(String token) {
-        Algorithm algorithm = Algorithm.HMAC256(secret);
-        DecodedJWT decodedJWT = JWT.require(algorithm)
-                .withIssuer("auth")
-                .build()
-                .verify(token.substring(7));
-
-        log.info("Checando se usuario com token:{} é administrador", token);
-
-        return decodedJWT.getClaim("role").asString().equals("ADMIN");
+        return refreshTokenRepository.findByToken(token.substring(7)).get().getUserRole().equals(UserRole.ADMIN);
     }
 
     private Instant getExpirationDate(){
