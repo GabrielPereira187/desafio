@@ -1,8 +1,8 @@
 package br.com.desafio.util;
 
-import br.com.desafio.DTO.Request.ProductRequest;
-import br.com.desafio.DTO.Response.ProductResponse;
-import br.com.desafio.entity.Product;
+import br.com.desafio.Product.DTO.Request.ProductRequest;
+import br.com.desafio.Product.DTO.Response.ProductResponse;
+import br.com.desafio.Product.entity.Product;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

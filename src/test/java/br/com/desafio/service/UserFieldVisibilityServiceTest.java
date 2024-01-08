@@ -1,8 +1,12 @@
 package br.com.desafio.service;
 
-import br.com.desafio.entity.UserFieldVisibility;
-import br.com.desafio.exception.UserFieldVisibility.UserVisibilityNotFoundException;
-import br.com.desafio.repository.UserFieldVisibilityRepository;
+import br.com.desafio.UserFieldVisibility.DTO.request.UserFieldVisibilityRequest;
+import br.com.desafio.UserFieldVisibility.DTO.response.UserFieldVisibilityResponse;
+import br.com.desafio.UserFieldVisibility.converter.UserFieldVisibilityConverter;
+import br.com.desafio.UserFieldVisibility.entity.UserFieldVisibility;
+import br.com.desafio.UserFieldVisibility.service.UserFieldVisibilityService;
+import br.com.desafio.UserFieldVisibility.exception.UserVisibilityNotFoundException;
+import br.com.desafio.UserFieldVisibility.repository.UserFieldVisibilityRepository;
 import br.com.desafio.util.UserFieldVisibilityCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,16 +36,28 @@ public class UserFieldVisibilityServiceTest {
 
     UserFieldVisibility userFieldVisibility;
 
+    UserFieldVisibilityRequest userFieldVisibilityRequest;
+
+    UserFieldVisibilityResponse userFieldVisibilityResponse;
+
+    @Mock
+    UserFieldVisibilityConverter userFieldVisibilityConverter;
+
     @BeforeEach
     public void setUp() {
         userFieldVisibility = UserFieldVisibilityCreator.createUserFieldVisibility();
+        userFieldVisibilityRequest = UserFieldVisibilityCreator.createUserFieldVisibilityRequest();
+        userFieldVisibilityResponse = UserFieldVisibilityCreator.createUserFieldVisibilityResponse();
     }
 
     @Test
     public void shouldSaveUserField() {
-        when(userFieldVisibilityRepository.save(userFieldVisibility)).thenReturn(userFieldVisibility);
+        when(userFieldVisibilityRepository.
+                save(userFieldVisibilityConverter.convertUserFieldVisibilityRequestToUserFieldVisibility(userFieldVisibilityRequest)))
+                .thenReturn(userFieldVisibility);
 
-        ResponseEntity<Object> response = userFieldVisibilityService.save(userFieldVisibility);
+        ResponseEntity<Object> response = userFieldVisibilityService
+                .save(userFieldVisibilityRequest);
 
         assertNotNull(response);
         assertEquals(response.getStatusCode().value(), 200);
@@ -50,8 +66,9 @@ public class UserFieldVisibilityServiceTest {
     @Test
     public void shouldFindUserFieldById() throws UserVisibilityNotFoundException {
         when(userFieldVisibilityRepository.findById(1L)).thenReturn(Optional.ofNullable(userFieldVisibility));
+        when(userFieldVisibilityConverter.convertUserFieldVisibilityToUserFieldVisibilityResponse(userFieldVisibility)).thenReturn(userFieldVisibilityResponse);
 
-        UserFieldVisibility userFieldVisibilityServiceById = userFieldVisibilityService.findById(1L);
+        UserFieldVisibilityResponse userFieldVisibilityServiceById = userFieldVisibilityService.findById(1L);
 
         assertNotNull(userFieldVisibilityServiceById);
     }
@@ -77,9 +94,12 @@ public class UserFieldVisibilityServiceTest {
 
     @Test
     public void shouldFindAllUserFields() {
-        when(userFieldVisibilityRepository.findAll()).thenReturn(Collections.singletonList(userFieldVisibility));
+        when(userFieldVisibilityRepository.findAll()).thenReturn(
+                Collections.singletonList(userFieldVisibility));
+        when(userFieldVisibilityConverter.convertUserFieldVisibilityListToUserFieldVisibilityResponseList
+                (Collections.singletonList(userFieldVisibility))).thenReturn(Collections.singletonList(userFieldVisibilityResponse));
 
-        List<UserFieldVisibility> response = userFieldVisibilityService.findAll();
+        List<UserFieldVisibilityResponse> response = userFieldVisibilityService.findAll();
 
         assertNotNull(response);
         assertEquals(response.size(), 1);

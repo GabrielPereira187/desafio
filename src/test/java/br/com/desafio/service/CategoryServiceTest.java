@@ -1,10 +1,9 @@
 package br.com.desafio.service;
 
-import br.com.desafio.entity.Category;
-import br.com.desafio.entity.enums.CategoryType;
-import br.com.desafio.exception.Category.CategoryNotFoundException;
-import br.com.desafio.exception.User.UserNotFoundException;
-import br.com.desafio.repository.CategoryRepository;
+import br.com.desafio.Category.service.CategoryService;
+import br.com.desafio.Category.entity.Category;
+import br.com.desafio.Category.exception.CategoryNotFoundException;
+import br.com.desafio.Category.repository.CategoryRepository;
 import br.com.desafio.util.CategoryCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

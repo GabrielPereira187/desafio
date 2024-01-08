@@ -1,7 +1,7 @@
 package br.com.desafio.util;
 
-import br.com.desafio.entity.Category;
-import br.com.desafio.entity.enums.CategoryType;
+import br.com.desafio.Category.entity.Category;
+import br.com.desafio.Category.entity.enums.CategoryType;
 
 public class CategoryCreator {
 

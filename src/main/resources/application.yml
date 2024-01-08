@@ -1,11 +1,11 @@
 spring:
   datasource:
-    driver-class-name: org.mariadb.jdbc.Driver
-    username: admin
-    url: jdbc:mariadb://localhost:3306/challenge
+    driver-class-name: org.postgresql.Driver
+    username: gabriel
+    url: jdbc:postgresql://localhost:5432/test
     testWhileIdle: 'true'
     validationQuery: SELECT 1
-    password: password
+    password: admin
   jpa:
     properties:
       hibernate:
@@ -13,7 +13,7 @@ spring:
           preferred_uuid_jdbc_type: CHAR
     show-sql: 'true'
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
 
 jwt-time-expiration-in-minutes: 1
 

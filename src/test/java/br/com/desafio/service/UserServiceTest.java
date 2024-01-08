@@ -1,8 +1,9 @@
 package br.com.desafio.service;
 
-import br.com.desafio.entity.User;
-import br.com.desafio.exception.User.UserNotFoundException;
-import br.com.desafio.repository.UserRepository;
+import br.com.desafio.User.service.UserService;
+import br.com.desafio.User.entity.User;
+import br.com.desafio.User.exception.UserNotFoundException;
+import br.com.desafio.User.repository.UserRepository;
 import br.com.desafio.util.UserCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ public class UserServiceTest {
 
     @BeforeEach
     public void setUp() {
-        user = UserCreator.createAdminUser();
+        user = UserCreator.createUserAdmin();
     }
 
     @Test
