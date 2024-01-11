@@ -1,11 +1,11 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    username: gabriel
-    url: jdbc:postgresql://localhost:5432/test
+    username: ${DATABASE_USERNAME}
+    url: ${DATABASE_URL}
     testWhileIdle: 'true'
     validationQuery: SELECT 1
-    password: admin
+    password: ${DATABASE_PASSWORD}
   jpa:
     properties:
       hibernate:
