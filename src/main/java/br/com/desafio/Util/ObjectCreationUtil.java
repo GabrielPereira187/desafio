@@ -139,4 +139,8 @@ public class ObjectCreationUtil {
     private static String encryptPassword(String password) {
         return new BCryptPasswordEncoder().encode(password);
     }
+
+    public static String formatField(String field) {
+        return field.replace("\n", "");
+    }
 }

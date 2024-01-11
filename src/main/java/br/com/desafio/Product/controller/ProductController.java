@@ -16,6 +16,7 @@ import br.com.desafio.Util.RequestUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,6 +39,7 @@ import java.util.Optional;
 @RequestMapping(value = "api/v1/product", produces = {"application/json"})
 @Tag(name = "Product-API")
 @Slf4j
+@SecurityRequirement(name = "javainuseapi")
 public class ProductController {
 
     private final ProductService productService;

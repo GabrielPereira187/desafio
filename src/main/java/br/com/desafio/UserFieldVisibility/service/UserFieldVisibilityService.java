@@ -3,9 +3,14 @@ package br.com.desafio.UserFieldVisibility.service;
 import br.com.desafio.UserFieldVisibility.DTO.request.UserFieldVisibilityRequest;
 import br.com.desafio.UserFieldVisibility.DTO.response.UserFieldVisibilityResponse;
 import br.com.desafio.UserFieldVisibility.converter.UserFieldVisibilityConverter;
+import br.com.desafio.UserFieldVisibility.entity.UserFieldVisibility;
 import br.com.desafio.UserFieldVisibility.exception.UserVisibilityNotFoundException;
 import br.com.desafio.UserFieldVisibility.repository.UserFieldVisibilityRepository;
+import br.com.desafio.Validator.DTO.response.MessagesResponse;
+import br.com.desafio.Validator.ObjectsValidator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -14,20 +19,32 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class UserFieldVisibilityService {
 
     private final UserFieldVisibilityRepository userFieldVisibilityRepository;
     private final UserFieldVisibilityConverter userFieldVisibilityConverter;
+    private final ObjectsValidator<UserFieldVisibilityRequest> userFieldVisibilityRequestObjectsValidator;
 
     @Autowired
-    public UserFieldVisibilityService(UserFieldVisibilityRepository userFieldVisibilityRepository, UserFieldVisibilityConverter userFieldVisibilityConverter) {
+    public UserFieldVisibilityService(UserFieldVisibilityRepository userFieldVisibilityRepository, UserFieldVisibilityConverter userFieldVisibilityConverter, ObjectsValidator<UserFieldVisibilityRequest> userFieldVisibilityRequestObjectsValidator) {
         this.userFieldVisibilityRepository = userFieldVisibilityRepository;
         this.userFieldVisibilityConverter = userFieldVisibilityConverter;
+        this.userFieldVisibilityRequestObjectsValidator = userFieldVisibilityRequestObjectsValidator;
     }
 
     public ResponseEntity<Object> save(UserFieldVisibilityRequest userFieldVisibility) {
+        List<String> violations = userFieldVisibilityRequestObjectsValidator.validate(userFieldVisibility);
+        MessagesResponse response = new MessagesResponse();
+        if (!violations.isEmpty()) {
+            response.setMessages(violations);
+
+            log.info("Erros encontrados para ação de inserção");
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
         userFieldVisibilityRepository.save(userFieldVisibilityConverter.convertUserFieldVisibilityRequestToUserFieldVisibility(userFieldVisibility));
-        return ResponseEntity.ok("Inserted user field visibility");
+        return ResponseEntity.ok("Inserido com sucesso");
     }
 
     public UserFieldVisibilityResponse findById(Long id) throws UserVisibilityNotFoundException {
@@ -38,7 +55,7 @@ public class UserFieldVisibilityService {
     public ResponseEntity<Object> deleteById(Long id) throws UserVisibilityNotFoundException {
         findById(id);
         userFieldVisibilityRepository.deleteById(id);
-        return ResponseEntity.ok("Deleted user field visibility");
+        return ResponseEntity.ok("Deletado com sucesso");
     }
 
     public List<UserFieldVisibilityResponse> findAll() {
@@ -73,7 +90,7 @@ public class UserFieldVisibilityService {
     }
 
     public List<String> getVisibleFieldsForEstoquista() {
-        return findAll().stream().filter(UserFieldVisibilityResponse::isVisible).map(UserFieldVisibilityResponse::name).collect(Collectors.toList());
+        return findAll().stream().filter(UserFieldVisibilityResponse::isVisible).map(UserFieldVisibilityResponse::getFieldName).collect(Collectors.toList());
     }
 
     public String getFieldByName(String field) {

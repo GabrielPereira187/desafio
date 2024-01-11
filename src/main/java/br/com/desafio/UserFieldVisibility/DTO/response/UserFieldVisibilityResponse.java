@@ -1,7 +1,13 @@
 package br.com.desafio.UserFieldVisibility.DTO.response;
 
-import lombok.Builder;
+import lombok.*;
 
 @Builder
-public record UserFieldVisibilityResponse(Long id, String name, boolean isVisible) {
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter @Setter
+public class UserFieldVisibilityResponse {
+    private Long id;
+    private String fieldName;
+    private boolean isVisible;
 }

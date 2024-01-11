@@ -35,6 +35,8 @@ public class User implements UserDetails {
     private String email;
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
+    @Column(name = "username")
+    private String username;
 
 
     @Override

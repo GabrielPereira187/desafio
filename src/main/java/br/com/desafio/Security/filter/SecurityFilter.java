@@ -10,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,6 +32,11 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     private final AuthorizationService authorizationService;
 
+    @Value("${jwt-time-expiration-in-minutes}")
+    private long TOKEN_EXPIRATION_TIME;
+
+    private static final long TIME_IN_SECONDS = 60;
+
     @Autowired
     public SecurityFilter(TokenService tokenService, UserService userService, RefreshTokenRepository refreshTokenRepository, AuthorizationService authorizationService) {
         this.tokenService = tokenService;
@@ -49,14 +55,12 @@ public class SecurityFilter extends OncePerRequestFilter {
 
             long duration = Duration.between(refreshToken.getExpiryDate(),actualInstant).getSeconds();
             
-            int statusResponse = 0;
-            
             if(request.getServletPath().contains("/auth/refreshToken")) {
-                statusResponse = authorizationService.refreshToken(refreshToken.getToken()).getStatusCode().value();
+                authorizationService.refreshToken(refreshToken.getToken()).getStatusCode().value();
                 duration = 0;
             }
 
-            if(duration < 300 && statusResponse == 200) {
+            if(duration < TOKEN_EXPIRATION_TIME * TIME_IN_SECONDS) {
                 String email = tokenService.validateToken(token).getBody();
                 UserDetails user = userService.findByEmail(email);
 

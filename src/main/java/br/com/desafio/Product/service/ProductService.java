@@ -32,6 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.history.Revision;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -111,7 +112,7 @@ public class ProductService {
 
     public ResponseEntity<String> deleteProduct(Long productId) throws ProductNotFoundException {
         try {
-            if(checkIfProductExist(productId)) {
+            if(checkIfProductExist(productId) != null) {
                 productRepository.deleteById(productId);
 
                 log.info("Deletando produto de id:{}", productId);
@@ -147,13 +148,13 @@ public class ProductService {
 
                         log.info("Produto com id:{} atualizado com suceso", productId);
 
-                        return ResponseEntity.ok(Collections.singletonList("Inserted successfully"));
+                        return ResponseEntity.ok(Collections.singletonList("Atualizado com sucesso"));
                     }).orElseGet(() ->{
                         productConverter.convertProductToProductResponse(productRepository.save(productConverter.convertProductRequestToProduct(product)));
 
                         log.info("Produto com id:{} salvo com suceso", productId);
 
-                        return ResponseEntity.ok(Collections.singletonList("Atualizado com sucesso"));
+                        return ResponseEntity.ok(Collections.singletonList("Inserido com sucesso"));
                     });
         }
         return null;
@@ -167,19 +168,23 @@ public class ProductService {
         return ResponseEntity.ok(productRepository.findAll(pageable));
     }
 
-    public ResponseEntity<String> deactivateProduct(Long productId) throws ProductNotFoundException {
+    public ResponseEntity<String> deactivateProduct(Long productId) {
         try {
-            if(checkIfProductExist(productId)) {
-                productRepository.deactivateProduct(productId);
+            if(checkIfProductExist(productId) != null) {
+                if(checkIfProductIsActive(productId)) {
+                    productRepository.deactivateProduct(productId);
 
-                log.info("Desativando produto com id:{}", productId);
+                    log.info("Desativando produto com id:{}", productId);
 
-                return ResponseEntity.ok("desativado com sucesso");
+                    return ResponseEntity.ok("Desativado com sucesso");
+                }
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Produto já desativado");
             }
-            return null;
+            throw new ProductNotFoundException(productId.toString());
         } catch (Exception e) {
-            throw new ProductNotFoundException(e.getMessage());
+            e.printStackTrace();
         }
+        return null;
     }
 
     public Page<ProductResponse> getProductsByUser(Long userId, Optional<Integer> page, Optional<String> sortBy, Optional<Integer> pageSize, Optional<Sort.Direction> sort) throws UserNotFoundException {
@@ -194,17 +199,19 @@ public class ProductService {
     }
 
     public List<AuditItem> getRevisions(Long id) throws ProductNotFoundException {
-        checkIfProductExist(id);
-        List<Revision<Long, Product>> revisions = productRepository.findRevisions(id).getContent();
-        List<AuditItem> auditItems = new ArrayList<>();
+        if(checkIfProductExist(id) != null) {
+            List<Revision<Long, Product>> revisions = productRepository.findRevisions(id).getContent();
+            List<AuditItem> auditItems = new ArrayList<>();
 
-        for(Revision<Long, Product> revision: revisions) {
-            auditItems.add(ObjectCreationUtil.createAuditItem(revision, userService.getUserName(revision.getEntity().getUserId())));
+            for(Revision<Long, Product> revision: revisions) {
+                auditItems.add(ObjectCreationUtil.createAuditItem(revision, userService.getUserName(revision.getEntity().getUserId())));
+            }
+
+            log.info("Buscando dados de auditoria do produto:{}", id);
+
+            return auditItems;
         }
-
-        log.info("Buscando dados de auditoria do produto:{}", id);
-
-        return auditItems;
+        return null;
     }
 
     public Page<ProductResponse> getProductByFields(Optional<Long> userId,
@@ -311,14 +318,18 @@ public class ProductService {
 
         log.info("Salvando imagem para o produto com id:{}", productId);
 
-        return ResponseEntity.ok("Sucesso");
+        return ResponseEntity.status(HttpStatus.OK).body("Sucesso");
     }
 
     private boolean checkIfUserIsAdmin(String token) {
         return tokenService.checkIfUserIsAdmin(token);
     }
 
-    private boolean checkIfProductExist(Long productId) throws ProductNotFoundException {
+    public Product checkIfProductExist(Long productId) throws ProductNotFoundException {
+        return productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId.toString()));
+    }
+
+    private boolean checkIfProductIsActive(Long productId) throws ProductNotFoundException {
         return productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId.toString())).isActiveProduct();
     }
 

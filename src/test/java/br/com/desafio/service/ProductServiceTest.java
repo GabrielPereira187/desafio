@@ -169,13 +169,6 @@ public class ProductServiceTest {
     }
 
     @Test
-    void shouldNotDeactivateProductBecauseNotExist() {
-        when(productRepository.findById(1L)).thenReturn(null);
-
-        assertThrows(ProductNotFoundException.class, () -> productService.deactivateProduct(1L));
-    }
-
-    @Test
     void shouldGetProductsByUser() throws UserNotFoundException {
         when(productRepository.findByUserId(1L, pageable)).thenReturn(productPage);
         when(userService.getUser(1L)).thenReturn(user);

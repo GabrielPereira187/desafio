@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity(name = "tbl_user_visibility")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,6 +21,11 @@ public class UserFieldVisibility {
     private Long id;
     @Column(name = "user_visibility_fieldName", nullable = false)
     private String fieldName;
-    @Column(name = "user_visibility_isVisible", nullable = false)
-    private boolean isVisible = true;
+    @Column(name = "user_visibility_isVisible")
+    private boolean isVisible;
+
+    @PrePersist
+    public void onCreate() {
+        this.isVisible = true;
+    }
 }

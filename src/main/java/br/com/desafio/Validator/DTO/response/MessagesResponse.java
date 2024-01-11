@@ -6,6 +6,5 @@ import java.util.List;
 
 @Data
 public class MessagesResponse {
-
     private List<String> messages;
 }

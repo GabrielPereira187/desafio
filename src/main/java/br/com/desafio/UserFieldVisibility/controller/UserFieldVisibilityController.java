@@ -7,6 +7,7 @@ import br.com.desafio.UserFieldVisibility.service.UserFieldVisibilityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import java.util.List;
 @RequestMapping("api/v1/userVisibility")
 @Tag(name = "UserVisibility-API")
 @Slf4j
+@SecurityRequirement(name = "javainuseapi")
 public class UserFieldVisibilityController {
 
     private final UserFieldVisibilityService userFieldVisibilityService;
@@ -36,7 +38,7 @@ public class UserFieldVisibilityController {
             @ApiResponse(responseCode = "500", description = "Erro ao inserir campo"),
     })
     @PostMapping
-    public ResponseEntity<Object> save(UserFieldVisibilityRequest userFieldVisibility) {
+    public ResponseEntity<Object> save(@RequestBody UserFieldVisibilityRequest userFieldVisibility) {
         return userFieldVisibilityService.save(userFieldVisibility);
     }
     @Operation(summary = "Realiza a busca de um campo de visualização", method = "GET")

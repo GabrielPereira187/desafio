@@ -3,6 +3,7 @@ package br.com.desafio.File.service;
 import br.com.desafio.File.exception.EmptyFieldList;
 import br.com.desafio.File.exception.FieldNotExistException;
 import br.com.desafio.Product.DTO.Response.ProductResponse;
+import br.com.desafio.Util.ObjectCreationUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
@@ -110,6 +111,7 @@ public class FileGeneratorService {
         headerMap.put("quantity", "Quantidade");
         for (String field : fields) {
             field = field.toLowerCase();
+            field = field.contains("\n") ? ObjectCreationUtil.formatField(field) : field;
             String value = headerMap.get(field);
             if(value == null) {
                 throw new FieldNotExistException(field);

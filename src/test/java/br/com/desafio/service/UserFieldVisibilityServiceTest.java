@@ -4,9 +4,10 @@ import br.com.desafio.UserFieldVisibility.DTO.request.UserFieldVisibilityRequest
 import br.com.desafio.UserFieldVisibility.DTO.response.UserFieldVisibilityResponse;
 import br.com.desafio.UserFieldVisibility.converter.UserFieldVisibilityConverter;
 import br.com.desafio.UserFieldVisibility.entity.UserFieldVisibility;
-import br.com.desafio.UserFieldVisibility.service.UserFieldVisibilityService;
 import br.com.desafio.UserFieldVisibility.exception.UserVisibilityNotFoundException;
 import br.com.desafio.UserFieldVisibility.repository.UserFieldVisibilityRepository;
+import br.com.desafio.UserFieldVisibility.service.UserFieldVisibilityService;
+import br.com.desafio.Validator.ObjectsValidator;
 import br.com.desafio.util.UserFieldVisibilityCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,9 @@ public class UserFieldVisibilityServiceTest {
 
     @Mock
     UserFieldVisibilityConverter userFieldVisibilityConverter;
+
+    @Mock
+    private ObjectsValidator<UserFieldVisibilityRequest> objectsValidator;
 
     @BeforeEach
     public void setUp() {

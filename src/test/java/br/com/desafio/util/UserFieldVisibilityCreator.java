@@ -26,7 +26,7 @@ public class UserFieldVisibilityCreator {
         return UserFieldVisibilityResponse
                 .builder()
                 .id(1L)
-                .name("name")
+                .fieldName("name")
                 .isVisible(true)
                 .build();
     }
