@@ -3,7 +3,6 @@ package br.com.desafio.UserFieldVisibility.service;
 import br.com.desafio.UserFieldVisibility.DTO.request.UserFieldVisibilityRequest;
 import br.com.desafio.UserFieldVisibility.DTO.response.UserFieldVisibilityResponse;
 import br.com.desafio.UserFieldVisibility.converter.UserFieldVisibilityConverter;
-import br.com.desafio.UserFieldVisibility.entity.UserFieldVisibility;
 import br.com.desafio.UserFieldVisibility.exception.UserVisibilityNotFoundException;
 import br.com.desafio.UserFieldVisibility.repository.UserFieldVisibilityRepository;
 import br.com.desafio.Validator.DTO.response.MessagesResponse;

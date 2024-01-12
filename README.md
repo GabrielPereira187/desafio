@@ -116,3 +116,6 @@ Para baixar e rodar o projeto Java, siga os passos abaixo:
 ``mvn spring-boot:run``
 
 5. Acesse a aplicação em seu navegador pelo endereço: `http://localhost:8080`
+6. Para uso da aplicação, é necessário rodar o script inserts.sql, que está em ./resources/scripts
+
+A aplicação está na nuvem utilizando o render, podendo ser acessada neste endereço: `https://desafio-service.onrender.com/swagger-ui/index.html#`

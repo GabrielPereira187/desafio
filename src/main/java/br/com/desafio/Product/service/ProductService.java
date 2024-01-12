@@ -121,7 +121,7 @@ public class ProductService {
             }
             return ResponseEntity.status(404).body("Produto não encontrado");
         } catch (Exception e) {
-            throw new ProductNotFoundException(e.getMessage());
+            throw new ProductNotFoundException(productId.toString());
         }
     }
 

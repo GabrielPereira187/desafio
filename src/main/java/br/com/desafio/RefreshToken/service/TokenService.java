@@ -1,13 +1,14 @@
 package br.com.desafio.RefreshToken.service;
 
 import br.com.desafio.RefreshToken.entity.RefreshToken;
+import br.com.desafio.RefreshToken.repository.RefreshTokenRepository;
 import br.com.desafio.User.entity.User;
 import br.com.desafio.User.entity.enums.UserRole;
-import br.com.desafio.RefreshToken.repository.RefreshTokenRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,8 +29,9 @@ public class TokenService {
     private static final String ISSUER = "auth";
 
     private static final String ROLE = "role";
-    
-    private static final Integer TOKEN_EXPIRATION_TIME = 5;
+
+    @Value("${jwt-time-expiration-in-minutes}")
+    private long TOKEN_EXPIRATION_TIME;
 
     public TokenService(RefreshTokenRepository refreshTokenRepository) {
         this.refreshTokenRepository = refreshTokenRepository;

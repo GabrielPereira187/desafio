@@ -1,15 +1,15 @@
 package br.com.desafio.Authorization.service;
 
 import br.com.desafio.Authorization.DTO.request.AuthenticationDTO;
-import br.com.desafio.Authorization.DTO.response.LoginResponseDTO;
 import br.com.desafio.Authorization.DTO.request.RegisterDTO;
-import br.com.desafio.Validator.DTO.response.MessagesResponse;
+import br.com.desafio.Authorization.DTO.response.LoginResponseDTO;
 import br.com.desafio.RefreshToken.entity.RefreshToken;
-import br.com.desafio.User.entity.User;
 import br.com.desafio.RefreshToken.repository.RefreshTokenRepository;
-import br.com.desafio.User.repository.UserRepository;
 import br.com.desafio.RefreshToken.service.TokenService;
+import br.com.desafio.User.entity.User;
+import br.com.desafio.User.repository.UserRepository;
 import br.com.desafio.Util.ObjectCreationUtil;
+import br.com.desafio.Validator.DTO.response.MessagesResponse;
 import br.com.desafio.Validator.ObjectsValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +100,7 @@ public class AuthorizationService implements UserDetailsService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
         if (this.userRepository.findByEmail(registerDto.email()) != null )
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body("E-mail já existente na base de dados");
 
         User newUser = ObjectCreationUtil.createUser(registerDto);
 

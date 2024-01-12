@@ -1,8 +1,6 @@
 package br.com.desafio.Product.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,7 +39,7 @@ public class Product {
     private BigDecimal ICMS;
     @Column(name = "product_revenue_value", nullable = false)
     private BigDecimal revenueValue;
-    @Column(name = "product_image", nullable = false)
+    @Column(name = "product_image")
     private String image;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "product_createdAt")

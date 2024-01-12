@@ -2,10 +2,6 @@ package br.com.desafio.Product.DTO.Response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Column;
-import jakarta.persistence.ColumnResult;
-import jakarta.persistence.ConstructorResult;
-import jakarta.persistence.SqlResultSetMapping;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

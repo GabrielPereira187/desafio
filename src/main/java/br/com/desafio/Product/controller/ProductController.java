@@ -1,17 +1,17 @@
 package br.com.desafio.Product.controller;
 
 
+import br.com.desafio.Audit.DTO.response.AuditChanges;
+import br.com.desafio.Audit.DTO.response.AuditItem;
+import br.com.desafio.Category.exception.CategoryNotFoundException;
+import br.com.desafio.File.service.FileGeneratorService;
 import br.com.desafio.Product.DTO.Request.ProductRequest;
 import br.com.desafio.Product.DTO.Response.AggregatedValueResponse;
-import br.com.desafio.Audit.DTO.response.AuditChanges;
 import br.com.desafio.Product.DTO.Response.ProductResponse;
-import br.com.desafio.Audit.DTO.response.AuditItem;
 import br.com.desafio.Product.entity.Product;
-import br.com.desafio.Category.exception.CategoryNotFoundException;
 import br.com.desafio.Product.exception.ProductNotFoundException;
-import br.com.desafio.User.exception.UserNotFoundException;
-import br.com.desafio.File.service.FileGeneratorService;
 import br.com.desafio.Product.service.ProductService;
+import br.com.desafio.User.exception.UserNotFoundException;
 import br.com.desafio.Util.RequestUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

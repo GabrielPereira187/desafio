@@ -1,9 +1,9 @@
 package br.com.desafio.Util;
 
+import br.com.desafio.Audit.DTO.response.AuditItem;
 import br.com.desafio.Authorization.DTO.request.RegisterDTO;
 import br.com.desafio.Product.DTO.Response.AggregatedValueResponse;
 import br.com.desafio.Product.DTO.Response.ProductResponse;
-import br.com.desafio.Audit.DTO.response.AuditItem;
 import br.com.desafio.Product.entity.Product;
 import br.com.desafio.RefreshToken.entity.RefreshToken;
 import br.com.desafio.User.entity.User;
